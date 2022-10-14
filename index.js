@@ -4,8 +4,9 @@ import translate from 'google-translate-api-x';
 
 const fromLanguage = "de";
 const toLanguage = "sv";
-const concurrentRequests = 100;
+const concurrentRequests = 10;
 let promises = [];
+let subArraySize;
 
 function readFile(filename) {
     const contents = readFileSync(filename, 'utf-8');
@@ -25,10 +26,10 @@ async function translateWord(word, fromLanguage, toLanguage) {
 function splitArray(array, numberOfArrays) {
     let arrays = [];
 
-    arraySize = Math.ceil(array.length / numberOfArrays);
+    subArraySize = Math.ceil(array.length / numberOfArrays);
 
     for (let i = 0; i < numberOfArrays; i++) {
-        arrays[i] = array.slice(0 + arraySize * i, arraySize * (i + 1));
+        arrays[i] = array.slice(0 + subArraySize * i, subArraySize * (i + 1));
     };
 
     return arrays;
@@ -36,11 +37,12 @@ function splitArray(array, numberOfArrays) {
 
 function makePromise(i) {
     if (indexesCurrent[i] == indexes[i] + subArraySize) {
-        console.log("Sub Array is done!");
+        console.log(`Sub Array ${i} is done!`);
         return 0;
     }
 
     promises.push(translateWord(fromLanguageWordsSplit[i][indexesCurrent[i]], fromLanguage, toLanguage).then((res) => {
+        console.log(`Completed ${indexes[i] * i + indexesCurrent[i]}`);
         toLanguageWords[indexesCurrent[i]] = res.text;
         indexesCurrent[i]++;
         makePromise(i);
@@ -50,10 +52,9 @@ function makePromise(i) {
 }
 
 const fromLanguageWords = readFile("list.txt");
-const fromLanguageWordsSplit = [["Katze"], ["Zeit"]];//splitArray(fromLanguageWords, concurrentRequests);
+const fromLanguageWordsSplit = splitArray(fromLanguageWords, concurrentRequests); //[["Katze"], ["Zeit"]];//
 let toLanguageWords = [];
 let indexes = [];
-let subArraySize = fromLanguageWordsSplit[0].length;
 
 
 for (let i = 0; i < fromLanguageWordsSplit.length; i++) {
@@ -63,6 +64,7 @@ for (let i = 0; i < fromLanguageWordsSplit.length; i++) {
 let indexesCurrent = cloneDeep(indexes);
 
 for (let i = 0; i < fromLanguageWordsSplit.length; i++) {
+    console.log("THEO");
     makePromise(i);
 };
 
