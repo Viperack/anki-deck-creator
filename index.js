@@ -36,10 +36,13 @@ function splitArray(array, numberOfArrays) {
 }
 
 function makePromise(i) {
+    console.log(i);
     if (indexesCurrent[i] == indexes[i] + subArraySize) {
         console.log(`Sub Array ${i} is done!`);
         return 0;
     }
+
+    console.log(`Word: ${fromLanguageWordsSplit[i][indexesCurrent[i]]}`);
 
     promises.push(translateWord(fromLanguageWordsSplit[i][indexesCurrent[i]], fromLanguage, toLanguage).then((res) => {
         console.log(`Completed ${indexes[i] * i + indexesCurrent[i]}`);
@@ -64,7 +67,6 @@ for (let i = 0; i < fromLanguageWordsSplit.length; i++) {
 let indexesCurrent = cloneDeep(indexes);
 
 for (let i = 0; i < fromLanguageWordsSplit.length; i++) {
-    console.log("THEO");
     makePromise(i);
 };
 
